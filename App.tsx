@@ -9,7 +9,7 @@ function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor="#1A1C23" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <AppProvider>
         <View style={styles.container}>
           <AppNavigator />
@@ -22,7 +22,7 @@ function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0E12',
+    backgroundColor: '#F9FAFB',
   },
 });
 

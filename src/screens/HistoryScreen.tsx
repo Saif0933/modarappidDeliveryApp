@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   addressSection: {
-    backgroundColor: 'rgba(255, 255, 255, 0.01)',
+    backgroundColor: 'rgba(0, 0, 0, 0.01)',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   expandedStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
     padding: 10,
     borderRadius: 8,
   },

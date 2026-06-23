@@ -176,7 +176,7 @@ export const ActiveOrderFlow: React.FC = () => {
                 onPress={() => toggleItemCheck(index)}
                 style={[
                   styles.itemVerifyRow,
-                  { backgroundColor: checkedItems[index] ? 'rgba(16, 185, 129, 0.06)' : 'rgba(255, 255, 255, 0.02)' },
+                  { backgroundColor: checkedItems[index] ? 'rgba(16, 185, 129, 0.06)' : 'rgba(0, 0, 0, 0.01)' },
                 ]}
               >
                 <View style={styles.itemTitleCol}>
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
   mapPlaceholder: {
     flex: 1,
-    backgroundColor: '#1E212E',
+    backgroundColor: '#E4E9F0',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: '30%',
     height: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#FFFFFF',
   },
   streetVertical: {
     position: 'absolute',
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: '25%',
     width: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#FFFFFF',
   },
   routeLine: {
     position: 'absolute',
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   deliveryNoteContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
     padding: 10,
     borderRadius: 8,
     borderWidth: 1,
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
   },
   miniEarningCard: {
     paddingVertical: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
   },
   miniEarningRow: {
     flexDirection: 'row',

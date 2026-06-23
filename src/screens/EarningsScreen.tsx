@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   balanceText: {
-    color: colors.white,
+    color: colors.text,
     fontSize: typography.fontSize.huge,
     fontWeight: typography.fontWeight.heavy,
   },
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   barTrack: {
     width: 8,
     height: 90,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
     borderRadius: 4,
     overflow: 'hidden',
     justifyContent: 'flex-end',

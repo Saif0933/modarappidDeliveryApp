@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#2D313E',
+    backgroundColor: '#E5E7EB',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   avatarBigText: {
-    color: colors.white,
+    color: colors.text,
     fontSize: typography.fontSize.xxl,
     fontWeight: typography.fontWeight.bold,
   },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   tabButtonsRow: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 8,
     padding: 4,
     marginTop: 12,

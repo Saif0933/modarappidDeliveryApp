@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   timerContainer: {
     width: '100%',
     height: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
     borderRadius: 12,
     overflow: 'hidden',
     justifyContent: 'center',
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   detailsGrid: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.25)',
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
     borderRadius: 12,
     paddingVertical: 12,
     marginBottom: 20,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
   },
   routeContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: 'rgba(0, 0, 0, 0.01)',
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   itemsSummary: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 12,

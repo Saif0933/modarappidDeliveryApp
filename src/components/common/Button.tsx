@@ -165,7 +165,7 @@ export const SwipeButton: React.FC<SwipeButtonProps> = ({
         styles.swipeContainer,
         {
           borderColor: color,
-          backgroundColor: 'rgba(26, 28, 35, 0.6)',
+          backgroundColor: 'rgba(0, 0, 0, 0.03)',
         },
         style,
       ]}
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   // Secondary Styles
   secondaryButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
     borderColor: colors.border,
   },
   secondaryText: {
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   // Disabled
   disabledButton: {
-    backgroundColor: '#1E2028',
+    backgroundColor: '#E5E7EB',
     borderColor: 'transparent',
     opacity: 0.5,
   },

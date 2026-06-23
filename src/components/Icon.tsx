@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { colors } from '../theme/colors';
 
 export type IconName =
   | 'dashboard'
@@ -44,24 +45,107 @@ export const Icon: React.FC<IconProps> = ({ name, color = '#FFFFFF', size = 24, 
 
       case 'wallet':
         return (
-          <View style={[styles.walletOuter, { width: size, height: size * 0.8, borderColor: color }]}>
-            <View style={[styles.walletFlap, { backgroundColor: color }]} />
+          <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+            <View
+              style={{
+                width: size * 0.9,
+                height: size * 0.7,
+                borderColor: color,
+                borderWidth: 2,
+                borderRadius: 4,
+                position: 'relative',
+                justifyContent: 'center',
+                alignItems: 'flex-end',
+              }}
+            >
+              {/* Flap */}
+              <View
+                style={{
+                  position: 'absolute',
+                  right: -2,
+                  width: size * 0.38,
+                  height: size * 0.28,
+                  borderColor: color,
+                  borderWidth: 2,
+                  backgroundColor: colors.card,
+                  borderTopLeftRadius: 3,
+                  borderBottomLeftRadius: 3,
+                  borderRightWidth: 0,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {/* Lock dot */}
+                <View style={{ width: size * 0.08, height: size * 0.08, borderRadius: 99, backgroundColor: color }} />
+              </View>
+            </View>
           </View>
         );
 
       case 'history':
         return (
-          <View style={[styles.clockOuter, { width: size, height: size, borderColor: color }]}>
-            <View style={[styles.clockHandMin, { backgroundColor: color, height: size * 0.35 }]} />
-            <View style={[styles.clockHandHour, { backgroundColor: color, width: size * 0.25 }]} />
+          <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+            <View
+              style={{
+                width: size * 0.9,
+                height: size * 0.9,
+                borderRadius: 99,
+                borderWidth: 2,
+                borderColor: color,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              {/* Hour hand */}
+              <View
+                style={{
+                  position: 'absolute',
+                  backgroundColor: color,
+                  width: 2,
+                  height: size * 0.25,
+                  top: size * 0.22,
+                }}
+              />
+              {/* Minute hand */}
+              <View
+                style={{
+                  position: 'absolute',
+                  backgroundColor: color,
+                  height: 2,
+                  width: size * 0.22,
+                  left: size * 0.42,
+                }}
+              />
+            </View>
           </View>
         );
 
       case 'user':
         return (
-          <View style={[styles.userContainer, { width: size, height: size }]}>
-            <View style={[styles.userHead, { backgroundColor: color, width: size * 0.45, height: size * 0.45 }]} />
-            <View style={[styles.userBody, { borderColor: color, width: size, height: size * 0.45, borderTopWidth: 2 }]} />
+          <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+            {/* Head */}
+            <View
+              style={{
+                width: size * 0.38,
+                height: size * 0.38,
+                borderRadius: 99,
+                borderWidth: 2,
+                borderColor: color,
+                marginBottom: 2,
+              }}
+            />
+            {/* Body */}
+            <View
+              style={{
+                width: size * 0.72,
+                height: size * 0.3,
+                borderTopLeftRadius: size * 0.25,
+                borderTopRightRadius: size * 0.25,
+                borderWidth: 2,
+                borderColor: color,
+                borderBottomWidth: 0,
+              }}
+            />
           </View>
         );
 
@@ -105,31 +189,73 @@ export const Icon: React.FC<IconProps> = ({ name, color = '#FFFFFF', size = 24, 
 
       case 'map-pin':
         return (
-          <View style={[styles.pinContainer, { width: size, height: size }]}>
-            <View style={[styles.pinCircle, { borderColor: color, width: size * 0.8, height: size * 0.8, borderWidth: 2 }]}>
-              <View style={[styles.pinCenter, { backgroundColor: color, width: size * 0.25, height: size * 0.25 }]} />
-            </View>
+          <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+            {/* Pin head */}
             <View
-              style={[
-                styles.pinPointer,
-                {
-                  backgroundColor: color,
-                  width: size * 0.35,
-                  height: size * 0.35,
-                  bottom: size * 0.05,
-                  transform: [{ rotate: '45deg' }],
-                },
-              ]}
+              style={{
+                width: size * 0.75,
+                height: size * 0.75,
+                borderRadius: (size * 0.75) / 2,
+                borderWidth: 2,
+                borderColor: color,
+                backgroundColor: 'transparent',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 2,
+              }}
+            >
+              {/* Center hole */}
+              <View style={{ width: size * 0.22, height: size * 0.22, borderRadius: (size * 0.22) / 2, backgroundColor: color }} />
+            </View>
+            {/* Pointer (rotated square sitting at the bottom of the circle) */}
+            <View
+              style={{
+                position: 'absolute',
+                width: size * 0.32,
+                height: size * 0.32,
+                backgroundColor: color,
+                transform: [{ rotate: '45deg' }],
+                bottom: size * 0.12,
+                zIndex: 1,
+              }}
             />
           </View>
         );
 
       case 'store':
         return (
-          <View style={[styles.storeContainer, { width: size, height: size }]}>
-            <View style={[styles.storeRoof, { borderBottomColor: color, borderBottomWidth: size * 0.3, borderLeftWidth: size * 0.5, borderRightWidth: size * 0.5 }]} />
-            <View style={[styles.storeWall, { borderColor: color, width: size * 0.8, height: size * 0.6 }]} />
-            <View style={[styles.storeDoor, { backgroundColor: color, width: size * 0.25, height: size * 0.3 }]} />
+          <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+            {/* Store roof */}
+            <View
+              style={{
+                width: 0,
+                height: 0,
+                backgroundColor: 'transparent',
+                borderStyle: 'solid',
+                borderLeftWidth: size * 0.45,
+                borderRightWidth: size * 0.45,
+                borderBottomWidth: size * 0.28,
+                borderLeftColor: 'transparent',
+                borderRightColor: 'transparent',
+                borderBottomColor: color,
+              }}
+            />
+            {/* Store body */}
+            <View
+              style={{
+                width: size * 0.75,
+                height: size * 0.45,
+                borderColor: color,
+                borderLeftWidth: 2,
+                borderRightWidth: 2,
+                borderBottomWidth: 2,
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+              }}
+            >
+              {/* Door */}
+              <View style={{ width: size * 0.22, height: size * 0.26, backgroundColor: color }} />
+            </View>
           </View>
         );
 
