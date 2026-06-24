@@ -7,7 +7,7 @@ import { Card } from '../components/common/Card';
 import { Icon } from '../components/Icon';
 
 export const ProfileScreen: React.FC = () => {
-  const { isOnline, toggleOnline } = useApp();
+  const { isOnline, toggleOnline, logout } = useApp();
   const [autoAccept, setAutoAccept] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [navMode, setNavMode] = useState<'inapp' | 'external'>('inapp');
@@ -24,6 +24,7 @@ export const ProfileScreen: React.FC = () => {
             if (isOnline) {
               toggleOnline();
             }
+            logout();
             Alert.alert('Shift Ended', 'You are logged out of your shift. Safe riding!');
           },
         },

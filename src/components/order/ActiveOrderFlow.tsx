@@ -81,6 +81,16 @@ export const ActiveOrderFlow: React.FC = () => {
         {(activeOrderStage === 'accepted' || activeOrderStage === 'picked_up') && (
           <Card variant="glass" style={styles.mapCard}>
             <View style={styles.mapPlaceholder}>
+              {/* Decorative Map Features: Parks & Lakes */}
+              <View style={styles.mapPark} />
+              <View style={[styles.mapPark, { right: '8%', top: '55%', width: 70, height: 40 }]} />
+              <View style={styles.mapLake} />
+              
+              {/* Decorative Map Features: Buildings */}
+              <View style={styles.mapBuilding} />
+              <View style={[styles.mapBuilding, { left: '10%', top: '70%', width: 50, height: 30 }]} />
+              <View style={[styles.mapBuilding, { left: '80%', top: '8%', width: 40, height: 40 }]} />
+
               {/* Grid Lines simulating streets */}
               <View style={styles.streetHorizontal} />
               <View style={[styles.streetHorizontal, { top: '65%' }]} />
@@ -169,32 +179,55 @@ export const ActiveOrderFlow: React.FC = () => {
               <Text style={styles.subtextLabel}>Verify sizes and tick items below</Text>
             </View>
 
-            {activeOrder.items.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                activeOpacity={0.8}
-                onPress={() => toggleItemCheck(index)}
-                style={[
-                  styles.itemVerifyRow,
-                  { backgroundColor: checkedItems[index] ? 'rgba(16, 185, 129, 0.06)' : 'rgba(0, 0, 0, 0.01)' },
-                ]}
-              >
-                <View style={styles.itemTitleCol}>
-                  <Text style={[styles.itemText, checkedItems[index] && styles.checkedText]}>{item}</Text>
-                </View>
-                <View
+            {activeOrder.items.map((item, index) => {
+              const sizeMatch = item.match(/\(([^)]+)\)/);
+              const size = sizeMatch ? sizeMatch[1] : null;
+              const cleanName = item.replace(/\s*\([^)]+\)/g, '');
+              
+              return (
+                <TouchableOpacity
+                  key={index}
+                  activeOpacity={0.8}
+                  onPress={() => toggleItemCheck(index)}
                   style={[
-                    styles.checkbox,
-                    {
-                      borderColor: checkedItems[index] ? colors.success : colors.border,
-                      backgroundColor: checkedItems[index] ? colors.success : 'transparent',
-                    },
+                    styles.itemVerifyRow,
+                    checkedItems[index]
+                      ? { backgroundColor: 'rgba(16, 185, 129, 0.05)', borderColor: 'rgba(16, 185, 129, 0.2)' }
+                      : { backgroundColor: colors.card, borderColor: colors.border },
                   ]}
                 >
-                  {checkedItems[index] && <Text style={styles.checkboxCheck}>✓</Text>}
-                </View>
-              </TouchableOpacity>
-            ))}
+                  <View style={styles.itemTitleCol}>
+                    <View style={styles.itemTitleRow}>
+                      <Icon
+                        name="check"
+                        color={checkedItems[index] ? colors.success : colors.textMuted}
+                        size={14}
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text style={[styles.itemText, checkedItems[index] && styles.checkedText]}>
+                        {cleanName}
+                      </Text>
+                    </View>
+                    {size && (
+                      <View style={styles.sizeBadge}>
+                        <Text style={styles.sizeBadgeText}>Size {size}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <View
+                    style={[
+                      styles.checkbox,
+                      {
+                        borderColor: checkedItems[index] ? colors.success : colors.border,
+                        backgroundColor: checkedItems[index] ? colors.success : 'transparent',
+                      },
+                    ]}
+                  >
+                    {checkedItems[index] && <Text style={styles.checkboxCheck}>✓</Text>}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
 
             <View style={styles.merchantNote}>
               <Icon name="verified" color={colors.warning} size={14} style={{ marginRight: 6 }} />
@@ -607,5 +640,50 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
     fontWeight: typography.fontWeight.semibold,
+  },
+  mapPark: {
+    position: 'absolute',
+    width: 80,
+    height: 45,
+    backgroundColor: '#E1EFE0',
+    borderRadius: 8,
+    left: '8%',
+    top: '12%',
+  },
+  mapLake: {
+    position: 'absolute',
+    width: 50,
+    height: 50,
+    backgroundColor: '#E0EEF9',
+    borderRadius: 25,
+    left: '35%',
+    top: '58%',
+  },
+  mapBuilding: {
+    position: 'absolute',
+    width: 45,
+    height: 35,
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    borderRadius: 4,
+    left: '55%',
+    top: '15%',
+  },
+  itemTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sizeBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 94, 58, 0.08)',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: 4,
+    marginLeft: 22,
+  },
+  sizeBadgeText: {
+    color: colors.primary,
+    fontSize: 9,
+    fontWeight: typography.fontWeight.bold,
   },
 });

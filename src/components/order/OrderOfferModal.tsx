@@ -72,7 +72,19 @@ export const OrderOfferModal: React.FC = () => {
                   },
                 ]}
               />
-              <Text style={styles.timerText}>{offerTimeRemaining}s remaining</Text>
+            </View>
+            <View style={styles.timerRow}>
+              <Icon
+                name="history"
+                color={offerTimeRemaining > 10 ? colors.primary : colors.danger}
+                size={14}
+              />
+              <Text style={[
+                styles.timerText,
+                { color: offerTimeRemaining > 10 ? colors.primary : colors.danger }
+              ]}>
+                Offer Expires in {offerTimeRemaining}s
+              </Text>
             </View>
 
             {/* Price Tag Container */}
@@ -109,8 +121,8 @@ export const OrderOfferModal: React.FC = () => {
               {/* Pickup node */}
               <View style={styles.routeRow}>
                 <View style={styles.iconColumn}>
-                  <View style={[styles.circleDot, { backgroundColor: colors.info }]}>
-                    <Icon name="store" color={colors.white} size={12} />
+                  <View style={[styles.circleDot, { backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
+                    <Icon name="store" color={colors.info} size={12} />
                   </View>
                   <View style={styles.lineConnector} />
                 </View>
@@ -126,8 +138,8 @@ export const OrderOfferModal: React.FC = () => {
               {/* Dropoff node */}
               <View style={styles.routeRow}>
                 <View style={styles.iconColumn}>
-                  <View style={[styles.circleDot, { backgroundColor: colors.success }]}>
-                    <Icon name="map-pin" color={colors.white} size={12} />
+                  <View style={[styles.circleDot, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
+                    <Icon name="map-pin" color={colors.success} size={12} />
                   </View>
                 </View>
                 <View style={styles.addressColumn}>
@@ -142,7 +154,7 @@ export const OrderOfferModal: React.FC = () => {
 
             {/* Items Summary */}
             <View style={styles.itemsSummary}>
-              <Icon name="box" color={colors.textMuted} size={14} style={{ marginRight: 6 }} />
+              <Icon name="check" color={colors.primary} size={14} style={{ marginRight: 6 }} />
               <Text style={styles.itemsText} numberOfLines={1}>
                 {incomingOffer.items.join(', ')}
               </Text>
@@ -220,27 +232,30 @@ const styles = StyleSheet.create({
   },
   timerContainer: {
     width: '100%',
-    height: 24,
+    height: 6,
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    borderRadius: 12,
+    borderRadius: 3,
     overflow: 'hidden',
-    justifyContent: 'center',
     position: 'relative',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   timerBar: {
     height: '100%',
     position: 'absolute',
     left: 0,
     top: 0,
+    borderRadius: 3,
+  },
+  timerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 18,
   },
   timerText: {
-    color: colors.text,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: typography.fontWeight.bold,
-    textAlign: 'center',
-    zIndex: 1,
-    textTransform: 'uppercase',
+    marginLeft: 6,
   },
   payoutContainer: {
     alignItems: 'center',
@@ -325,9 +340,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   lineConnector: {
-    width: 2,
+    width: 1,
     height: 36,
-    backgroundColor: colors.border,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: colors.border,
     marginVertical: 4,
   },
   addressColumn: {

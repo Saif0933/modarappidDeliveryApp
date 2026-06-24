@@ -45,6 +45,15 @@ interface AppContextType {
   advanceOrderStage: () => void;
   completeOrder: () => void;
   simulateOrder: () => void;
+  
+  // Auth additions
+  isAuthenticated: boolean;
+  phoneNumber: string;
+  isVerifyingOtp: boolean;
+  login: (phone: string) => Promise<void>;
+  verifyOtp: (otp: string) => Promise<boolean>;
+  logout: () => void;
+  cancelOtp: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -102,6 +111,9 @@ const MOCK_OFFERS: Order[] = [
 ];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState<boolean>(false);
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('dashboard');
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
@@ -288,6 +300,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentScreen(screen);
   };
 
+  const login = async (phone: string) => {
+    if (phone.trim().length !== 10) {
+      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    setPhoneNumber(phone);
+    setIsVerifyingOtp(true);
+  };
+
+  const verifyOtp = async (otp: string) => {
+    if (otp === '123456' || otp === '654321' || otp.length === 6) {
+      setIsAuthenticated(true);
+      setIsVerifyingOtp(false);
+      return true;
+    } else {
+      Alert.alert('Incorrect OTP', 'The OTP entered is incorrect. (Use 123456 for testing)');
+      return false;
+    }
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setPhoneNumber('');
+    setIsVerifyingOtp(false);
+  };
+
+  const cancelOtp = () => {
+    setIsVerifyingOtp(false);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -306,6 +348,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         advanceOrderStage,
         completeOrder,
         simulateOrder,
+        isAuthenticated,
+        phoneNumber,
+        isVerifyingOtp,
+        login,
+        verifyOtp,
+        logout,
+        cancelOtp,
       }}
     >
       {children}
