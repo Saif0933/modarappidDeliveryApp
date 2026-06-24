@@ -1,18 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
   Animated,
   Dimensions,
-  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
+import { useApp } from '../../context/AppContext';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { useApp } from '../../context/AppContext';
-import { Card } from '../common/Card';
 import { Button, SwipeButton } from '../common/Button';
+import { Card } from '../common/Card';
 import { Icon } from '../Icon';
 
 const { height, width } = Dimensions.get('window');

@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
   Alert,
-  Animated,
-  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
+import { useApp } from '../../context/AppContext';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { useApp, OrderStage } from '../../context/AppContext';
+import { SwipeButton } from '../common/Button';
 import { Card } from '../common/Card';
-import { Button, SwipeButton } from '../common/Button';
 import { Icon } from '../Icon';
 
 export const ActiveOrderFlow: React.FC = () => {
