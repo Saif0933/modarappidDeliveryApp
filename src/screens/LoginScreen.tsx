@@ -25,7 +25,7 @@ export const LoginScreen: React.FC = () => {
       return;
     }
     setLoading(true);
-    // Simulate API network delay
+    // Simulate API network loading or delay 
     setTimeout(async () => {
       setLoading(false);
       await login(phone);
@@ -38,7 +38,7 @@ export const LoginScreen: React.FC = () => {
       style={styles.container}
     >
       <View style={styles.headerSpacer}>
-        {/* Decorative Brand Header */}
+        {/* Decorative Brand Header section */}
         <View style={styles.logoCircle}>
           <Icon name="store" color={colors.primary} size={32} />
         </View>

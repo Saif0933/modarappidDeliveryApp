@@ -23,7 +23,7 @@ export const OtpScreen: React.FC = () => {
 
   const otpInputRef = useRef<TextInput>(null);
 
-  // Resend OTP countdown timer
+  // Resend OTP countdown timer feature
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (timer > 0) {
@@ -34,7 +34,7 @@ export const OtpScreen: React.FC = () => {
     return () => clearInterval(interval);
   }, [timer]);
 
-  // Auto-focus input on mount
+  // Auto-focus input on mount section
   useEffect(() => {
     const focusTimeout = setTimeout(() => {
       otpInputRef.current?.focus();
