@@ -7,7 +7,7 @@ interface CardProps {
   style?: StyleProp<ViewStyle>;
   variant?: 'normal' | 'glass' | 'accent';
 }
-
+// cart style 
 export const Card: React.FC<CardProps> = ({ children, style, variant = 'normal' }) => {
   const getCardStyle = () => {
     switch (variant) {
