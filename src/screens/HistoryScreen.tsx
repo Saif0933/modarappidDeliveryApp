@@ -6,7 +6,7 @@ import { useApp, Order } from '../context/AppContext';
 import { Card } from '../components/common/Card';
 import { Icon } from '../components/Icon';
 
-// Enable layout animations on Android
+// Enable layout animations on Android and ios
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -31,7 +31,7 @@ export const HistoryScreen: React.FC = () => {
     return (
       <TouchableOpacity activeOpacity={0.9} onPress={() => toggleExpandOrder(item.id)}>
         <Card variant={isExpanded ? 'accent' : 'normal'} style={styles.historyCard}>
-          {/* Card Header Row */}
+          {/* Card Header Row section */}
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.orderIdText}>{item.id}</Text>
@@ -45,7 +45,7 @@ export const HistoryScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Core Info Summary */}
+          {/* Core Info Summary section */}
           <View style={styles.addressSection}>
             <View style={styles.row}>
               <Icon name="store" color={colors.info} size={14} style={styles.rowIcon} />

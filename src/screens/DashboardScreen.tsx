@@ -30,7 +30,7 @@ export const DashboardScreen: React.FC = () => {
       );
       anim1.start();
 
-      // Loop pulse 2 (staggered delay)
+      // Loop pulse 1 (staggered delay)
       anim2 = Animated.loop(
         Animated.sequence([
           Animated.delay(1200),
@@ -58,7 +58,7 @@ export const DashboardScreen: React.FC = () => {
     return <ActiveOrderFlow />;
   }
 
-  // Interpolations for radar waves
+  // Interpolations for radar waves feature
   const scale1 = pulse1.interpolate({
     inputRange: [0, 1],
     outputRange: [0.8, 2.8],
