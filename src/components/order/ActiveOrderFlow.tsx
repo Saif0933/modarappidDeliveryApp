@@ -15,7 +15,7 @@ import { Card } from '../common/Card';
 import { Icon } from '../Icon';
 
 export const ActiveOrderFlow: React.FC = () => {
-  const { activeOrder, activeOrderStage, advanceOrderStage, completeOrder } = useApp();
+  const { activeOrder, activeOrderStage, advanceOrderStage, completeOrder, cancelActiveOrder } = useApp();
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
 
   if (!activeOrder) return null;
@@ -65,10 +65,15 @@ export const ActiveOrderFlow: React.FC = () => {
     <View style={styles.container}>
       {/* Top Status Header */}
       <View style={styles.statusHeader}>
-        <View style={styles.headerInfo}>
-          <Text style={styles.orderIdText}>Order {activeOrder.id}</Text>
-          <View style={[styles.stageBadge, { backgroundColor: getStageBadgeColor() }]}>
-            <Text style={styles.stageBadgeText}>{getStageHeader()}</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity onPress={cancelActiveOrder} style={styles.backButton}>
+            <Icon name="chevron-left" color={colors.text} size={20} />
+          </TouchableOpacity>
+          <View style={styles.headerInfo}>
+            <Text style={styles.orderIdText}>Order {activeOrder.id}</Text>
+            <View style={[styles.stageBadge, { backgroundColor: getStageBadgeColor() }]}>
+              <Text style={styles.stageBadgeText}>{getStageHeader()}</Text>
+            </View>
           </View>
         </View>
         <Text style={styles.estTimeText}>Est. Arrival: {activeOrder.estTime}</Text>
@@ -337,6 +342,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+    marginLeft: -4,
   },
   headerInfo: {
     flexDirection: 'row',

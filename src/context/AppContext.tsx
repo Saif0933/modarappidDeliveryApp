@@ -45,6 +45,7 @@ interface AppContextType {
   advanceOrderStage: () => void;
   completeOrder: () => void;
   simulateOrder: () => void;
+  cancelActiveOrder: () => void;
   
   // Auth additions
   isAuthenticated: boolean;
@@ -300,6 +301,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentScreen(screen);
   };
 
+  const cancelActiveOrder = () => {
+    setActiveOrder(null);
+    setActiveOrderStage(null);
+  };
+
   const login = async (phone: string) => {
     if (phone.trim().length !== 10) {
       Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number.');
@@ -348,6 +354,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         advanceOrderStage,
         completeOrder,
         simulateOrder,
+        cancelActiveOrder,
         isAuthenticated,
         phoneNumber,
         isVerifyingOtp,
