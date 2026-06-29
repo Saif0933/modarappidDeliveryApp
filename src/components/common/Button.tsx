@@ -108,6 +108,8 @@ export const SwipeButton: React.FC<SwipeButtonProps> = ({
 
   const buttonSize = 52;
   const maxSwipeDistance = containerWidth - buttonSize - 8; // 4px padding on each side
+  const maxSwipeDistanceRef = useRef(0);
+  maxSwipeDistanceRef.current = maxSwipeDistance;
 
   const panResponder = useRef(
     PanResponder.create({
@@ -116,20 +118,22 @@ export const SwipeButton: React.FC<SwipeButtonProps> = ({
         isSwiping.current = true;
       },
       onPanResponderMove: (e, gestureState) => {
+        const maxDist = maxSwipeDistanceRef.current;
         if (gestureState.dx < 0) {
           pan.x.setValue(0);
-        } else if (gestureState.dx > maxSwipeDistance) {
-          pan.x.setValue(maxSwipeDistance);
+        } else if (gestureState.dx > maxDist) {
+          pan.x.setValue(maxDist);
         } else {
           pan.x.setValue(gestureState.dx);
         }
       },
       onPanResponderRelease: (e, gestureState) => {
         isSwiping.current = false;
-        if (gestureState.dx >= maxSwipeDistance * 0.8) {
+        const maxDist = maxSwipeDistanceRef.current;
+        if (gestureState.dx >= maxDist * 0.8) {
           // Swipe success! Snap to end
           Animated.spring(pan.x, {
-            toValue: maxSwipeDistance,
+            toValue: maxDist,
             useNativeDriver: false,
             tension: 50,
           }).start(() => {

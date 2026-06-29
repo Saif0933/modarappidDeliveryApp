@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Alert,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  Image,
+  TextInput,
+  ViewStyle
 } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { colors } from '../../theme/colors';
@@ -14,9 +17,79 @@ import { SwipeButton } from '../common/Button';
 import { Card } from '../common/Card';
 import { Icon } from '../Icon';
 
+const ORDER_COORDINATES: Record<string, {
+  storeLat: number;
+  storeLon: number;
+  customerLat: number;
+  customerLon: number;
+  centerLat: number;
+  centerLon: number;
+}> = {
+  'DRV-9082': {
+    storeLat: 28.5672,
+    storeLon: 77.3210,
+    customerLat: 28.6080,
+    customerLon: 77.3780,
+    centerLat: 28.5876,
+    centerLon: 77.3495,
+  },
+  'DRV-4531': {
+    storeLat: 28.6304,
+    storeLon: 77.2177,
+    customerLat: 28.5991,
+    customerLon: 77.2224,
+    centerLat: 28.6148,
+    centerLon: 77.2201,
+  },
+  'DRV-3312': {
+    storeLat: 28.5041,
+    storeLon: 77.0971,
+    customerLat: 28.4357,
+    customerLon: 77.1025,
+    centerLat: 28.4699,
+    centerLon: 77.0998,
+  },
+};
+
+const getCoordinatesForOrder = (orderId: string) => {
+  const idNum = parseInt(orderId.replace(/\D/g, ''), 10) || 0;
+  const keys = Object.keys(ORDER_COORDINATES);
+  const matchedKey = keys.find(k => orderId.includes(k) || k.includes(orderId));
+  if (matchedKey) {
+    return ORDER_COORDINATES[matchedKey];
+  }
+  return {
+    storeLat: 28.5672 + (idNum % 10) * 0.003,
+    storeLon: 77.3210 + (idNum % 7) * 0.003,
+    customerLat: 28.6080 + (idNum % 5) * 0.003,
+    customerLon: 77.3780 + (idNum % 3) * 0.003,
+    centerLat: 28.5876 + (idNum % 6) * 0.003,
+    centerLon: 77.3495 + (idNum % 4) * 0.003,
+  };
+};
+
 export const ActiveOrderFlow: React.FC = () => {
   const { activeOrder, activeOrderStage, advanceOrderStage, completeOrder, cancelActiveOrder } = useApp();
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
+  const [mapProvider, setMapProvider] = useState<'google' | 'ola' | 'simulated'>('google');
+  const [googleKey, setGoogleKey] = useState<string>('');
+  const [olaKey, setOlaKey] = useState<string>('');
+  const [showConfig, setShowConfig] = useState<boolean>(false);
+  const [riderProgress, setRiderProgress] = useState<number>(0);
+
+  useEffect(() => {
+    setRiderProgress(0);
+    const interval = setInterval(() => {
+      setRiderProgress((prev) => {
+        if (prev >= 1) {
+          clearInterval(interval);
+          return 1;
+        }
+        return prev + 0.025; // Smooth incremental steps
+      });
+    }, 300);
+    return () => clearInterval(interval);
+  }, [activeOrderStage]);
 
   if (!activeOrder) return null;
 
@@ -61,6 +134,55 @@ export const ActiveOrderFlow: React.FC = () => {
     }
   };
 
+  const coords = getCoordinatesForOrder(activeOrder.id);
+  const zoom = 13;
+
+  // Determine current rider coordinates (interpolated along the Ola Map / Google Map path)
+  let riderLat = coords.storeLat;
+  let riderLon = coords.storeLon;
+  
+  if (activeOrderStage === 'accepted') {
+    // Rider starts 1.2km away southwest from store and heads to store
+    const startLat = coords.storeLat - 0.007;
+    const startLon = coords.storeLon - 0.007;
+    riderLat = startLat + riderProgress * 0.007;
+    riderLon = startLon + riderProgress * 0.007;
+  } else if (activeOrderStage === 'picked_up') {
+    // Rider travels from store to customer
+    riderLat = coords.storeLat + riderProgress * (coords.customerLat - coords.storeLat);
+    riderLon = coords.storeLon + riderProgress * (coords.customerLon - coords.storeLon);
+  }
+
+  const getPercentPos = (lat: number, lon: number) => {
+    const latDiff = lat - coords.centerLat;
+    const lonDiff = lon - coords.centerLon;
+    const latSpan = 0.024; // Visual bounding box span
+    const lonSpan = 0.024;
+    
+    const left = 50 + (lonDiff / lonSpan) * 50;
+    const top = 50 - (latDiff / latSpan) * 50;
+    
+    return {
+      left: `${Math.max(6, Math.min(94, left))}%`,
+      top: `${Math.max(6, Math.min(94, top))}%`
+    };
+  };
+
+  const getMapUrl = () => {
+    if (mapProvider === 'google') {
+      if (googleKey.trim()) {
+        return `https://maps.googleapis.com/maps/api/staticmap?center=${coords.centerLat},${coords.centerLon}&zoom=${zoom}&size=500x220&scale=2&maptype=roadmap&markers=color:red%7Clabel:S%7C${coords.storeLat},${coords.storeLon}&markers=color:green%7Clabel:C%7C${coords.customerLat},${coords.customerLon}&path=color:0x3b82f6%7Cweight:5%7C${coords.storeLat},${coords.storeLon}%7C${coords.customerLat},${coords.customerLon}&key=${googleKey}`;
+      }
+      return `https://static-maps.yandex.ru/1.x/?ll=${coords.centerLon},${coords.centerLat}&z=${zoom}&l=map&size=450,220&pt=${coords.storeLon},${coords.storeLat},pm2rdm~${coords.customerLon},${coords.customerLat},pm2gld`;
+    } else if (mapProvider === 'ola') {
+      if (olaKey.trim()) {
+        return `https://api.olamaps.io/tiles/v1/styles/default-light-standard/static/${coords.centerLon},${coords.centerLat},${zoom}/500x220.png?api_key=${olaKey}`;
+      }
+      return `https://static-maps.yandex.ru/1.x/?ll=${coords.centerLon},${coords.centerLat}&z=${zoom}&l=map&size=450,220&pt=${coords.storeLon},${coords.storeLat},pm2rdm~${coords.customerLon},${coords.customerLat},pm2gld`;
+    }
+    return '';
+  };
+
   return (
     <View style={styles.container}>
       {/* Top Status Header */}
@@ -80,79 +202,265 @@ export const ActiveOrderFlow: React.FC = () => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Dynamic Stylized Map Section for Navigation stages */}
-        {(activeOrderStage === 'accepted' || activeOrderStage === 'picked_up') && (
-          <Card variant="glass" style={styles.mapCard}>
-            <View style={styles.mapPlaceholder}>
-              {/* Decorative Map Features: Parks & Lakes */}
-              <View style={styles.mapPark} />
-              <View style={[styles.mapPark, { right: '8%', top: '55%', width: 70, height: 40 }]} />
-              <View style={styles.mapLake} />
-              
-              {/* Decorative Map Features: Buildings */}
-              <View style={styles.mapBuilding} />
-              <View style={[styles.mapBuilding, { left: '10%', top: '70%', width: 50, height: 30 }]} />
-              <View style={[styles.mapBuilding, { left: '80%', top: '8%', width: 40, height: 40 }]} />
-
-              {/* Grid Lines simulating streets */}
-              <View style={styles.streetHorizontal} />
-              <View style={[styles.streetHorizontal, { top: '65%' }]} />
-              <View style={styles.streetVertical} />
-              <View style={[styles.streetVertical, { left: '75%' }]} />
-
-              {/* Route line */}
+        {/* Dynamic Stage Progress Bar Tracker */}
+        <View style={styles.trackerContainer}>
+          <View style={styles.trackerLine}>
+            <View
+              style={[
+                styles.trackerLineActive,
+                {
+                  width:
+                    activeOrderStage === 'accepted'
+                      ? '15%'
+                      : activeOrderStage === 'arrived_at_store'
+                      ? '50%'
+                      : '100%',
+                },
+              ]}
+            />
+          </View>
+          <View style={styles.trackerStepsRow}>
+            <View style={styles.trackerStep}>
               <View
                 style={[
-                  styles.routeLine,
-                  activeOrderStage === 'accepted'
-                    ? { width: '60%', height: 4, left: '20%', top: '48%', transform: [{ rotate: '15deg' }] }
-                    : { width: '70%', height: 4, left: '15%', top: '35%', transform: [{ rotate: '-25deg' }] },
+                  styles.trackerDotShape,
+                  (activeOrderStage === 'accepted' ||
+                    activeOrderStage === 'arrived_at_store' ||
+                    activeOrderStage === 'picked_up') &&
+                    styles.trackerDotShapeActive,
                 ]}
-              />
+              >
+                {activeOrderStage !== 'accepted' &&
+                (activeOrderStage === 'arrived_at_store' || activeOrderStage === 'picked_up') ? (
+                  <Text style={styles.trackerStepCheck}>✓</Text>
+                ) : (
+                  <View style={[styles.trackerStepInnerDot, activeOrderStage === 'accepted' && { backgroundColor: colors.primary }]} />
+                )}
+              </View>
+              <Text style={styles.trackerStepLabel}>Accept</Text>
+            </View>
 
-              {/* Store & Customer Pins */}
-              {activeOrderStage === 'accepted' ? (
-                <>
-                  {/* Rider Dot */}
-                  <View style={[styles.riderDot, { left: '20%', top: '40%' }]}>
-                    <View style={styles.riderRadar} />
-                  </View>
-                  {/* Store Pin */}
-                  <View style={[styles.pinWrapper, { left: '75%', top: '45%' }]}>
-                    <Icon name="store" color={colors.info} size={16} />
-                    <View style={styles.pinShadow} />
-                  </View>
-                </>
-              ) : (
-                <>
-                  {/* Rider Dot */}
-                  <View style={[styles.riderDot, { left: '15%', top: '50%' }]}>
-                    <View style={styles.riderRadar} />
-                  </View>
-                  {/* Customer Pin */}
-                  <View style={[styles.pinWrapper, { left: '78%', top: '22%' }]}>
-                    <Icon name="map-pin" color={colors.success} size={16} />
-                    <View style={styles.pinShadow} />
-                  </View>
-                </>
-              )}
+            <View style={styles.trackerStep}>
+              <View
+                style={[
+                  styles.trackerDotShape,
+                  (activeOrderStage === 'arrived_at_store' || activeOrderStage === 'picked_up') &&
+                    styles.trackerDotShapeActive,
+                ]}
+              >
+                {activeOrderStage === 'picked_up' ? (
+                  <Text style={styles.trackerStepCheck}>✓</Text>
+                ) : (
+                  <View style={[styles.trackerStepInnerDot, activeOrderStage === 'arrived_at_store' && { backgroundColor: colors.primary }]} />
+                )}
+              </View>
+              <Text style={styles.trackerStepLabel}>Merchant</Text>
+            </View>
 
-              {/* Compass Card overlay */}
-              <View style={styles.mapOverlayInfo}>
-                <Icon name="navigation" color={colors.primary} size={16} />
-                <Text style={styles.mapOverlayDistance}>
-                  {activeOrderStage === 'accepted' ? activeOrder.pickupDistance : activeOrder.distance}
+            <View style={styles.trackerStep}>
+              <View
+                style={[
+                  styles.trackerDotShape,
+                  activeOrderStage === 'picked_up' && styles.trackerDotShapeActive,
+                ]}
+              >
+                <View style={[styles.trackerStepInnerDot, activeOrderStage === 'picked_up' && { backgroundColor: colors.primary }]} />
+              </View>
+              <Text style={styles.trackerStepLabel}>Customer</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Dynamic Stylized Map Section for Navigation stages */}
+        {(activeOrderStage === 'accepted' || activeOrderStage === 'picked_up') && (
+          <>
+            <Card variant="glass" style={styles.mapCard}>
+              {/* Map Provider Tabs */}
+              <View style={styles.mapTabs}>
+                <TouchableOpacity
+                  style={[styles.mapTab, mapProvider === 'google' && styles.mapTabActive]}
+                  onPress={() => setMapProvider('google')}
+                >
+                  <Text style={[styles.mapTabText, mapProvider === 'google' && styles.mapTabTextActive]}>Google Map</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.mapTab, mapProvider === 'ola' && styles.mapTabActive]}
+                  onPress={() => setMapProvider('ola')}
+                >
+                  <Text style={[styles.mapTabText, mapProvider === 'ola' && styles.mapTabTextActive]}>Ola Map</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.mapTab, mapProvider === 'simulated' && styles.mapTabActive]}
+                  onPress={() => setMapProvider('simulated')}
+                >
+                  <Text style={[styles.mapTabText, mapProvider === 'simulated' && styles.mapTabTextActive]}>Simulated</Text>
+                </TouchableOpacity>
+                
+                {/* Settings Gear */}
+                <TouchableOpacity
+                  style={styles.settingsIcon}
+                  onPress={() => setShowConfig(!showConfig)}
+                >
+                  <Icon name="verified" color={showConfig ? colors.primary : colors.textMuted} size={14} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.mapPlaceholder}>
+                {mapProvider === 'simulated' ? (
+                  <>
+                    {/* Decorative Map Features: Parks & Lakes */}
+                    <View style={styles.mapPark} />
+                    <View style={[styles.mapPark, { right: '8%', top: '55%', width: 70, height: 40 }]} />
+                    <View style={styles.mapLake} />
+                    
+                    {/* Decorative Map Features: Buildings */}
+                    <View style={styles.mapBuilding} />
+                    <View style={[styles.mapBuilding, { left: '10%', top: '70%', width: 50, height: 30 }]} />
+                    <View style={[styles.mapBuilding, { left: '80%', top: '8%', width: 40, height: 40 }]} />
+
+                    {/* Grid Lines simulating streets */}
+                    <View style={styles.streetHorizontal} />
+                    <View style={[styles.streetHorizontal, { top: '65%' }]} />
+                    <View style={styles.streetVertical} />
+                    <View style={[styles.streetVertical, { left: '75%' }]} />
+
+                    {/* Route line */}
+                    <View
+                      style={[
+                        styles.routeLine,
+                        activeOrderStage === 'accepted'
+                          ? { width: '60%', height: 4, left: '20%', top: '48%', transform: [{ rotate: '15deg' }] }
+                          : { width: '70%', height: 4, left: '15%', top: '35%', transform: [{ rotate: '-25deg' }] },
+                      ]}
+                    />
+
+                    {/* Store Pin (Simulated) */}
+                    <View style={[styles.pinWrapper, { left: '75%', top: '45%' }]}>
+                      <Icon name="store" color={colors.info} size={16} />
+                      <View style={styles.pinShadow} />
+                    </View>
+
+                    {/* Customer Pin (Simulated) */}
+                    <View style={[styles.pinWrapper, { left: '78%', top: '22%' }]}>
+                      <Icon name="map-pin" color={colors.success} size={16} />
+                      <View style={styles.pinShadow} />
+                    </View>
+
+                    {/* Animated Rider Dot (Simulated) */}
+                    <View
+                      style={[
+                        styles.riderDot,
+                        activeOrderStage === 'accepted'
+                          ? {
+                              left: `${20 + riderProgress * (75 - 20)}%`,
+                              top: `${40 + riderProgress * (45 - 40)}%`,
+                            }
+                          : {
+                              left: `${75 + riderProgress * (78 - 75)}%`,
+                              top: `${45 + riderProgress * (22 - 45)}%`,
+                            },
+                      ]}
+                    >
+                      <View style={styles.riderRadar} />
+                    </View>
+                  </>
+                ) : (
+                  <View style={{ flex: 1, position: 'relative' }}>
+                    <Image
+                      source={{ uri: getMapUrl() }}
+                      style={styles.mapImage}
+                      resizeMode="cover"
+                    />
+                    
+                    {/* Real coordinates mapped pins overlay */}
+                    {/* Store Pin */}
+                    <View style={[styles.pinWrapper, { position: 'absolute', ...getPercentPos(coords.storeLat, coords.storeLon) } as ViewStyle]}>
+                      <Icon name="store" color={colors.info} size={18} />
+                      <View style={styles.pinShadow} />
+                    </View>
+
+                    {/* Customer Pin */}
+                    <View style={[styles.pinWrapper, { position: 'absolute', ...getPercentPos(coords.customerLat, coords.customerLon) } as ViewStyle]}>
+                      <Icon name="map-pin" color={colors.success} size={18} />
+                      <View style={styles.pinShadow} />
+                    </View>
+
+                    {/* Animated Rider Dot */}
+                    <View
+                      style={[
+                        styles.riderDot,
+                        {
+                          position: 'absolute',
+                          ...getPercentPos(riderLat, riderLon),
+                        } as ViewStyle,
+                      ]}
+                    >
+                      <View style={styles.riderRadar} />
+                    </View>
+
+                    {/* Floating API status / Marker overlay */}
+                    <View style={styles.mapInfoBadge}>
+                      <Text style={styles.mapInfoBadgeText}>
+                        {mapProvider === 'google'
+                          ? (googleKey.trim() ? 'Google Maps Live API' : 'Google Map (Ola GPS Tracking)')
+                          : (olaKey.trim() ? 'Ola Maps Live API' : 'Ola Map Tracking Active')}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Compass Card overlay */}
+                <View style={styles.mapOverlayInfo}>
+                  <Icon name="navigation" color={colors.primary} size={16} />
+                  <Text style={styles.mapOverlayDistance}>
+                    {activeOrderStage === 'accepted' ? activeOrder.pickupDistance : activeOrder.distance}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.directionGuide}>
+                <Text style={styles.directionText} numberOfLines={1}>
+                  {activeOrderStage === 'accepted'
+                    ? `Navigate to: ${activeOrder.storeName}`
+                    : `Navigate to: ${activeOrder.customerAddress}`}
                 </Text>
               </View>
-            </View>
-            <View style={styles.directionGuide}>
-              <Text style={styles.directionText} numberOfLines={1}>
-                {activeOrderStage === 'accepted'
-                  ? `Navigate to: ${activeOrder.storeName}`
-                  : `Navigate to: ${activeOrder.customerAddress}`}
-              </Text>
-            </View>
-          </Card>
+            </Card>
+
+            {/* API Config Panel */}
+            {showConfig && (
+              <Card style={styles.configCard}>
+                <Text style={styles.configTitle}>Map API Credentials</Text>
+                <Text style={styles.configSubtitle}>Enter your API keys to query live endpoints:</Text>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Google Maps API Key</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={googleKey}
+                    onChangeText={setGoogleKey}
+                    placeholder="AIzaSy..."
+                    placeholderTextColor={colors.textMuted}
+                    autoCapitalize="none"
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Ola Maps API Key</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={olaKey}
+                    onChangeText={setOlaKey}
+                    placeholder="Enter Ola API Key"
+                    placeholderTextColor={colors.textMuted}
+                    autoCapitalize="none"
+                  />
+                </View>
+                <TouchableOpacity style={styles.closeConfigBtn} onPress={() => setShowConfig(false)}>
+                  <Text style={styles.closeConfigBtnText}>Done</Text>
+                </TouchableOpacity>
+              </Card>
+            )}
+          </>
         )}
 
         {/* Address and Contacts Section */}
@@ -386,8 +694,106 @@ const styles = StyleSheet.create({
   mapCard: {
     padding: 0,
     overflow: 'hidden',
-    height: 220,
+    height: 250,
     marginBottom: 16,
+  },
+  mapTabs: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  mapTab: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  mapTabActive: {
+    backgroundColor: colors.primary,
+  },
+  mapTabText: {
+    fontSize: 10,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.textMuted,
+  },
+  mapTabTextActive: {
+    color: colors.white,
+    fontWeight: typography.fontWeight.bold,
+  },
+  settingsIcon: {
+    marginLeft: 'auto',
+    padding: 6,
+  },
+  mapImage: {
+    width: '100%',
+    height: '100%',
+  },
+  mapInfoBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    zIndex: 10,
+  },
+  mapInfoBadgeText: {
+    color: colors.white,
+    fontSize: 9,
+    fontWeight: typography.fontWeight.bold,
+  },
+  configCard: {
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  configTitle: {
+    fontSize: 12,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
+    marginBottom: 2,
+  },
+  configSubtitle: {
+    fontSize: 10,
+    color: colors.textMuted,
+    marginBottom: 8,
+  },
+  inputGroup: {
+    marginBottom: 8,
+  },
+  inputLabel: {
+    fontSize: 9,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.textMuted,
+    marginBottom: 4,
+  },
+  textInput: {
+    height: 36,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    fontSize: 11,
+    color: colors.text,
+    backgroundColor: colors.background,
+  },
+  closeConfigBtn: {
+    backgroundColor: colors.success,
+    borderRadius: 6,
+    paddingVertical: 8,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  closeConfigBtnText: {
+    color: colors.white,
+    fontSize: 11,
+    fontWeight: typography.fontWeight.bold,
   },
   mapPlaceholder: {
     flex: 1,
@@ -698,5 +1104,73 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 9,
     fontWeight: typography.fontWeight.bold,
+  },
+  trackerContainer: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  trackerLine: {
+    height: 4,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 2,
+    position: 'absolute',
+    left: 45,
+    right: 45,
+    top: 28,
+  },
+  trackerLineActive: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 2,
+  },
+  trackerStepsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  trackerStep: {
+    alignItems: 'center',
+    width: 70,
+  },
+  trackerDotShape: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    borderWidth: 2,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+    zIndex: 2,
+  },
+  trackerDotShapeActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.card,
+  },
+  trackerStepInnerDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.border,
+  },
+  trackerStepCheck: {
+    color: colors.primary,
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  trackerStepLabel: {
+    fontSize: 10,
+    color: colors.textMuted,
+    fontWeight: typography.fontWeight.semibold,
   },
 });
