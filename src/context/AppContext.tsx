@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 
 export type OrderStage = 'accepted' | 'arrived_at_store' | 'picked_up';
@@ -19,7 +19,7 @@ export interface Order {
   tip: number;
   estTime: string; // e.g. "25 mins"
 }
-
+// this interface
 export interface EarningSummary {
   today: number;
   week: number;
